@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <nav class="flex mb-8" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{% url 'accounts:profile' %}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                        Back to Profile
+                    </a>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
+            <div class="bg-blue-600 px-8 py-10 text-white">
+                <h2 class="text-3xl font-extrabold">Update Profile</h2>
+                <p class="mt-2 text-blue-100">Manage your personal information and profile settings.</p>
+            </div>
+
+            <form action="{% url 'accounts:profile_update' %}" method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="p-4 bg-red-50 border-l-4 border-red-400 text-red-700 rounded-md">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="space-y-4">
+                    <label class="block text-sm font-bold text-gray-700 uppercase tracking-wider">Profile Picture</label>
+                    <div class="flex items-center space-x-6">
+                        <div class="shrink-0">
+                            {% if user.User_picture %}
+                                <img src="{{ user.User_picture.url }}" alt="Current Profile" class="h-20 w-20 object-cover rounded-full ring-2 ring-blue-500 ring-offset-2">
+                            {% else %}
+                                <div class="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl">
+                                    {{ user.username|first|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <label class="block w-full">
+                            <span class="sr-only">Choose profile photo</span>
+                            <input type="file" name="User_picture" id="User_picture"
+                                class="block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2.5 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-blue-50 file:text-blue-700
+                                hover:file:bg-blue-100 transition-colors cursor-pointer">
+                        </label>
+                    </div>
+                    {% if form.User_picture.errors %}
+                        <p class="text-red-500 text-xs italic mt-1">{{ form.User_picture.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <hr class="border-gray-100">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div class="space-y-1">
+                        <label for="username" class="block text-sm font-semibold text-gray-700">Username</label>
+                        <input type="text" id="username" name="username" value="{{ form.username.value|default:user.username }}" 
+                            class="block w-full px-4 py-3 rounded-xl border-gray-200 bg-gray-50 border focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none">
+                        {% if form.username.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.username.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-1">
+                        <label for="email" class="block text-sm font-semibold text-gray-700">Email Address</label>
+                        <input type="email" id="email" name="email" value="{{ form.email.value|default:user.email }}" 
+                            class="block w-full px-4 py-3 rounded-xl border-gray-200 bg-gray-50 border focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none">
+                        {% if form.email.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-1">
+                        <label for="phone_number" class="block text-sm font-semibold text-gray-700">Phone Number</label>
+                        <input type="text" id="phone_number" name="phone_number" value="{{ form.phone_number.value|default:user.phone_number|default:'' }}" 
+                            placeholder="+1 (555) 000-0000"
+                            class="block w-full px-4 py-3 rounded-xl border-gray-200 bg-gray-50 border focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none">
+                        {% if form.phone_number.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.phone_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-1">
+                        <label for="date_of_birth" class="block text-sm font-semibold text-gray-700">Date of Birth</label>
+                        <input type="date" id="date_of_birth" name="date_of_birth" 
+                            value="{{ form.date_of_birth.value|date:'Y-m-d'|default:user.date_of_birth|date:'Y-m-d' }}" 
+                            class="block w-full px-4 py-3 rounded-xl border-gray-200 bg-gray-50 border focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none">
+                        {% if form.date_of_birth.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.date_of_birth.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label for="address" class="block text-sm font-semibold text-gray-700">Full Address</label>
+                    <textarea id="address" name="address" rows="3" 
+                        class="block w-full px-4 py-3 rounded-xl border-gray-200 bg-gray-50 border focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none">{{ form.address.value|default:user.address|default:'' }}</textarea>
+                    {% if form.address.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ form.address.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-6">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95">
+                        Save Changes
+                    </button>
+                    <a href="{% url 'accounts:profile' %}" class="flex-1 bg-white text-gray-700 text-center font-bold py-4 px-6 rounded-xl border border-gray-200 hover:bg-gray-50 transition-all active:scale-95">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

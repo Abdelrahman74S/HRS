@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pb-12">
+    <div class="relative">
+        <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1080&auto=format&fit=crop" 
+            alt="Hotel Cover"
+            class="w-full h-48 md:h-64 object-cover shadow-inner" />
+        
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="-mt-12 sm:-mt-16 sm:flex sm:items-end sm:space-x-5">
+                <div class="flex">
+                    {% if user_profile.User_picture %}
+                        <img class="h-24 w-24 rounded-full ring-4 ring-white sm:h-32 sm:w-32 object-cover bg-white" 
+                            src="{{ user_profile.User_picture.url }}" alt="Profile">
+                    {% else %}
+                        <img class="h-24 w-24 rounded-full ring-4 ring-white sm:h-32 sm:w-32 bg-blue-100" 
+                            src="https://ui-avatars.com/api/?name={{ user_profile.username }}&background=0D8ABC&color=fff" alt="Default">
+                    {% endif %}
+                </div>
+                <div class="mt-6 sm:flex-1 sm:min-w-0 sm:flex sm:items-center sm:justify-end sm:space-x-6 sm:pb-1">
+                    <div class="sm:hidden md:block mt-6 min-w-0 flex-1">
+                        <h1 class="text-2xl font-bold text-gray-900 truncate">
+                            {{ user_profile.first_name }} {{ user_profile.last_name|default:"" }}
+                        </h1>
+                        <p class="text-gray-500 font-medium">@{{ user_profile.username }}</p>
+                    </div>
+                    <div class="mt-6 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
+                        <a href="{% url 'accounts:profile_update' %}" 
+                        class="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition">
+                            <svg class="-ml-1 mr-2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 15.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                            Edit Profile
+                        </a>
+                    </div>
+                    <div class="mt-6 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
+                        <a href="{% url 'accounts:change_password' %}" 
+                        class="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition">
+                            <svg class="-ml-1 mr-2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 15.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                            Change Password
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-6 lg:grid-flow-col-dense lg:grid-cols-3">
+        
+        <div class="space-y-6 lg:col-start-1 lg:col-span-2">
+            <section class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-4 py-5 sm:px-6 border-b border-gray-100">
+                    <h2 class="text-lg font-bold text-gray-900">Personal Information</h2>
+                </div>
+                <div class="px-4 py-5 sm:p-0">
+                    <dl class="sm:divide-y sm:divide-gray-100">
+                        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">Email Address</dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ user_profile.email }}</dd>
+                        </div>
+                        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">Phone Number</dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ user_profile.phone_number|default:"Not provided" }}</dd>
+                        </div>
+                        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">Address</dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ user_profile.address|default:"Not provided" }}</dd>
+                        </div>
+                        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">Date of Birth</dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ user_profile.date_of_birth|default:"Not set" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </section>
+        </div>
+
+        <div class="space-y-6 lg:col-start-3 lg:col-span-1">
+            {% if User.user_type == "G" %}
+            <section class="bg-blue-600 rounded-lg shadow-lg p-6 text-white relative overflow-hidden">
+                <div class="relative z-10">
+                    <h3 class="text-lg font-bold mb-2">Loyalty Program</h3>
+                    <p class="text-blue-100 text-sm mb-4">Your membership status is active.</p>
+                    
+                    <div class="flex items-baseline">
+                        <span class="text-4xl font-extrabold tracking-tight">{{ user_profile.loyalty_points }}</span>
+                        <span class="ml-2 text-blue-100 text-sm">Points</span>
+                    </div>
+                    
+                </div>
+                <svg class="absolute right-0 bottom-0 text-blue-500 opacity-20 w-32 h-32 transform translate-x-10 translate-y-10" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 8V5.414L7.707 6.707a1 1 0 01-1.414-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13h5a2 2 0 110 4h-5v1a1 1 0 102 0v-1H4a2 2 0 110-4h5z" clip-rule="evenodd" />
+                </svg>
+            </section>
+            {% endif %}
+
+            <section class="bg-white shadow rounded-lg p-6 border-l-4 border-blue-500">
+                <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Account Type</h3>
+                <p class="mt-2 text-2xl font-bold text-gray-900">{{ user_profile.get_user_type_display }}</p>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

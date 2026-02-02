@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-10 px-4">
+    <nav class="flex mb-8 text-sm font-medium text-gray-500">
+        <a href="{% url 'rooms:room_list' %}" class="hover:text-blue-600">Inventory</a>
+        <span class="mx-3 text-gray-300">/</span>
+        <span class="text-gray-900 font-semibold">Room {{ room.room_number }}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="relative overflow-hidden rounded-[2.5rem] shadow-xl border border-gray-100">
+                {% with room.images.all as images %}
+                <img id="mainImage" src="{% if images %}{{ images.0.image.url }}{% else %}https://via.placeholder.com/800x600{% endif %}" 
+                     class="w-full h-[500px] object-cover transition-all duration-500">
+                {% endwith %}
+            </div>
+
+            <div class="grid grid-cols-4 gap-4">
+                {% for img in room.images.all %}
+                <div class="h-28 rounded-2xl overflow-hidden border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">
+                    <img src="{{ img.image.url }}" onclick="swapImage(this.src)" class="w-full h-full object-cover">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="lg:sticky lg:top-10">
+            <div class="bg-white rounded-[2.5rem] shadow-2xl p-8 border border-gray-50">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-4xl font-black text-gray-900">{{ room.room_number }}</h1>
+                    <span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest {% if room.status == 'A' %}bg-green-100 text-green-700{% else %}bg-amber-100 text-amber-700{% endif %}">
+                        {{ room.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="space-y-6 mb-10">
+                    <div>
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Location</span>
+                        <p class="text-lg font-bold text-gray-800">{{ room.room_type.name }} • Floor {{ room.floor }}</p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Rate Per Night</span>
+                        <p class="text-3xl font-black text-blue-600">${{ room.pricing_override|default:room.room_type.base_price }}</p>
+                    </div>
+                    {% if room.notes %}
+                    <div class="p-4 bg-gray-50 rounded-2xl border-l-4 border-blue-500 italic text-gray-600 text-sm">
+                        "{{ room.notes }}"
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <a href="{% url 'rooms:room_update' room.slug %}" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 text-center shadow-lg transition-all">
+                        Edit Details
+                    </a>
+                    <a href="{% url 'rooms:room_delete' room.slug %}" class="w-full border border-red-100 text-red-600 font-bold py-4 rounded-2xl hover:bg-red-50 text-center transition-all">
+                        Delete Room
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function swapImage(src) {
+        const main = document.getElementById('mainImage');
+        main.style.opacity = '0';
+        setTimeout(() => {
+            main.src = src;
+            main.style.opacity = '1';
+        }, 200);
+    }
+</script>
+{% endblock %}
