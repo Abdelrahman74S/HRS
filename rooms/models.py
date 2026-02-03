@@ -1,7 +1,7 @@
 from django.db import models
 from .Utils import generate_unique_room_number 
 from django.utils.text import slugify
-
+from accounts.models import User
 class Amenity(models.Model):
     name = models.CharField(max_length=100)
     
@@ -39,7 +39,6 @@ class Room(models.Model):
     is_active = models.BooleanField(default=True)
     notes = models.TextField(blank=True, null=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     pricing_override = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)

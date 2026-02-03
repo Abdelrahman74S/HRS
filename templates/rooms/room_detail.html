@@ -42,7 +42,7 @@
                     </div>
                     <div>
                         <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Rate Per Night</span>
-                        <p class="text-3xl font-black text-blue-600">${{ room.pricing_override|default:room.room_type.base_price }}</p>
+                        <p class="text-3xl font-black text-blue-600">${{ room.room_type.base_price|add:room.pricing_override|default:room.room_type.base_price }}</p>
                     </div>
                     {% if room.notes %}
                     <div class="p-4 bg-gray-50 rounded-2xl border-l-4 border-blue-500 italic text-gray-600 text-sm">

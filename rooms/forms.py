@@ -32,6 +32,6 @@ RoomImageFormSet = inlineformset_factory(
     Room, 
     RoomImage, 
     form=RoomImageForm, 
-    extra=3,
+    extra=5,
     can_delete=True
 )

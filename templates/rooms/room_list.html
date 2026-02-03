@@ -34,7 +34,7 @@
             <div class="p-8">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-2xl font-black text-gray-900">{{ room.room_number }}</h3>
-                    <p class="text-blue-600 font-black text-xl">${{ room.room_type.base_price }}</p>
+                    <p class="text-blue-600 font-black text-xl">${{ room.room_type.base_price|add:room.pricing_override|default:room.room_type.base_price }}</p>
                 </div>
                 <p class="text-gray-500 text-sm mb-6">{{ room.room_type.name }} • Floor {{ room.floor }}</p>
                 <a href="{% url 'rooms:room_detail' room.slug %}" class="block w-full text-center bg-gray-50 text-gray-900 font-bold py-4 rounded-2xl hover:bg-gray-900 hover:text-white transition-all">

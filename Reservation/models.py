@@ -42,9 +42,28 @@ class Booking(models.Model):
         related_name='checkouts_handled'
     )
 
+    def sum_total_price(self):
+        base = self.room.room_type.base_price 
+        
+        extra = self.room.pricing_override or 0
+        
+        single_night_price = base + extra
+    
+        if self.check_out_date and self.check_in_date:
+            nights = (self.check_out_date - self.check_in_date).days
+            nights = max(nights, 1) 
+            self.total_price = single_night_price * nights
+        else:
+            self.total_price = single_night_price
+    
+        return self.total_price
+
     def save(self, *args, **kwargs):
         if not self.reservation_number:
             self.reservation_number = self.generate_reservation_number()
+            
+        self.sum_total_price()
+        
         super().save(*args, **kwargs)
 
     def generate_reservation_number(self):
