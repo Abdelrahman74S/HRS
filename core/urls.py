@@ -22,7 +22,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls', namespace = "account")),
-    path("rooms/" , include("rooms.urls" , namespace = 'room'))
+    path("rooms/" , include("rooms.urls" , namespace = 'room')),
+    path('reservations/', include('Reservation.urls', namespace='reservations')),
 ]
 
 if settings.DEBUG:

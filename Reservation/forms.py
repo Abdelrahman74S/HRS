@@ -5,15 +5,26 @@ class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
         fields = [
-            'guest', 'room', 'check_in_date', 'check_out_date', 
-            'number_of_guests', 'status', 'special_requests'
+            'check_in_date', 
+            'check_out_date', 
+            'number_of_guests', 
+            'special_requests'
         ]
         widgets = {
-            'check_in_date': forms.DateInput(attrs={'type': 'date'}),
-            'check_out_date': forms.DateInput(attrs={'type': 'date'}),
-            'special_requests': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Any special requirements?'}),
-            'number_of_guests': forms.NumberInput(attrs={'min': 1}),
+            'check_in_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}),
+            'check_out_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}),
+            'special_requests': forms.Textarea(attrs={'rows': 3, 'class': 'form-input', 'placeholder': 'Any special requirements?'}),
+            'number_of_guests': forms.NumberInput(attrs={'min': 1, 'class': 'form-input'}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        check_in = cleaned_data.get('check_in_date')
+        check_out = cleaned_data.get('check_out_date')
+
+        if check_in and check_out and check_out <= check_in:
+            raise forms.ValidationError("Check-out date must be after check-in date.")
+        return cleaned_data
 
 class PaymentForm(forms.ModelForm):
     class Meta:

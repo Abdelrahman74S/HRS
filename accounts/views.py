@@ -23,7 +23,6 @@ class UserRegisterView(CreateView):
         login(self.request, self.object)
         return response
 
-
 class UserLoginView(LoginView):
     template_name = 'accounts/login.html'
     redirect_authenticated_user = True
@@ -50,8 +49,6 @@ class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_object(self):
         return self.request.user
-
-    
 
 
 class ChangePasswordView(LoginRequiredMixin, TemplateView):
