@@ -4,6 +4,8 @@ from django.db import transaction
 from .models import Room
 from .forms import RoomForm, RoomImageFormSet
 from rooms.Ispermissions import IsManager
+from django.db.models import Q
+from django.shortcuts import render
 
 class RoomCreateView(IsManager, CreateView):
     model = Room
@@ -78,3 +80,22 @@ class RoomDeleteView(IsManager, DeleteView):
     success_url = reverse_lazy('rooms:room_list')  
     slug_field = 'slug'
     slug_url_kwarg = 'slug'
+
+
+def search(request):
+    q = request.GET.get('q', '')
+    if q:
+        rooms = Room.objects.filter(
+            Q(room_number__icontains=q) | 
+            Q(room_type__name__icontains=q) | 
+            Q(notes__icontains=q)
+        ).distinct()
+    else:
+        # rooms = Room.objects.all()
+        rooms = Room.objects.none()
+
+    return render(request, 'rooms/search.html', {
+    # return render(request, 'rooms/room_list.html', {
+        'rooms': rooms,
+        'query': q
+    })
