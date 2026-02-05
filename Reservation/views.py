@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import CreateView, ListView, DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
@@ -8,7 +8,7 @@ from .models import Booking
 from .forms import BookingForm
 from rooms.models import Room
 
-from Ispermissions import IsGuest
+from Reservation.Ispermissions import IsGuest
 
 class BookingCreateView(IsGuest, CreateView):
     model = Booking
@@ -53,16 +53,26 @@ class UserBookingListView(LoginRequiredMixin, ListView):
             return Booking.objects.all()
         return Booking.objects.filter(guest=user)
 
-class BookingDeleteView(LoginRequiredMixin, DeleteView):
+
+class BookingDetailView(LoginRequiredMixin, DetailView):
     model = Booking
-    template_name = 'reservations/booking_confirm_delete.html'
-    success_url = reverse_lazy('reservations:my_bookings')
+    template_name = 'reservations/booking_detail.html'
+    context_object_name = 'booking'
 
     def get_queryset(self):
         user = self.request.user
+
         if user.is_staff or user.user_type == 'M':
             return Booking.objects.all()
-        return Booking.objects.filter(guest=user, status='pending')
+
+        return Booking.objects.filter(guest=user)
+
+    def handle_no_permission(self):
+        messages.error(
+            self.request,
+            "You do not have permission to view this booking."
+        )
+        return redirect('reservations:my_bookings')
 
 
 class BookingDeleteView(LoginRequiredMixin, DeleteView):

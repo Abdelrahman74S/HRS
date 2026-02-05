@@ -114,3 +114,18 @@ class Payment(models.Model):
     class Meta:
         verbose_name = "Payment"
         verbose_name_plural = "Payments"
+
+
+class ManagerBooking(Booking):
+    class Meta:
+        proxy = True
+
+    def can_cancel(self):
+        return self.status in ["pending", "confirmed"]
+
+class GuestBooking(Booking):
+    class Meta:
+        proxy = True
+
+    def can_cancel(self):
+        return self.status == "pending"
