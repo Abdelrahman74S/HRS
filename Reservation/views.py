@@ -81,7 +81,7 @@ class BookingDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff or user.groups.filter(user_type='M').exists():
+        if user.is_staff or user.user_type == 'M':
             return Booking.objects.all()
         
         return Booking.objects.filter(
@@ -109,17 +109,18 @@ class CreatePaymentView(IsGuest,CreateView):
         
         return context
     
+
     def form_valid(self, form):
         booking = get_object_or_404(Booking, pk=self.kwargs['booking_id'])
         
         form.instance.reservation = booking
         form.instance.amount = booking.total_price
+        form.instance.payment_status = 'completed' 
         
-        if form.cleaned_data['payment_status'] == 'completed':
-            booking.status = 'confirmed'
-            booking.save()
-            messages.success(self.request, "Payment and booking have been successfully confirmed!" )
+        booking.status = 'confirmed'
+        booking.save()
         
+        messages.success(self.request, "Payment successful and booking confirmed!")
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -127,24 +128,24 @@ class CreatePaymentView(IsGuest,CreateView):
 
 def check_in_guest(request, booking_id):
     if not (request.user.is_staff or request.user.user_type == 'M'):
-        messages.error(request, "You are not allowed to perform this action.")
+        messages.error(request, "Access denied.")
         return redirect('reservations:my_bookings')
             
     booking = get_object_or_404(Booking, pk=booking_id)
+    
+    if booking.status != 'confirmed':
+        messages.error(request, "Cannot check-in. The booking must be confirmed (Paid) first.")
+        return redirect('reservations:booking_detail', pk=booking.pk)
     
     booking.status = 'checked_in'
     booking.checked_in_by = request.user
     booking.save()
     
-    booking.room.status = 'O'  # Occupied
+    booking.room.status = 'O' 
     booking.room.save()
     
-    messages.success(
-        request,
-        f"Guest has been successfully checked in to room {booking.room.room_number}."
-    )
+    messages.success(request, f"Guest checked-in to room {booking.room.room_number}.")
     return redirect('reservations:booking_detail', pk=booking.pk)
-
 
 def check_out_guest(request, booking_id):
     if not (request.user.is_staff or request.user.user_type == 'M'):

@@ -29,8 +29,13 @@ class BookingForm(forms.ModelForm):
 class PaymentForm(forms.ModelForm):
     class Meta:
         model = Payment
-        fields = ['payment_method', 'amount', 'payment_status', 'transaction_id']
+        fields = ['payment_method', 'transaction_id'] 
         widgets = {
-            'amount': forms.NumberInput(attrs={'step': '0.01'}),
-            'transaction_id': forms.TextInput(attrs={'placeholder': 'Enter transaction reference if applicable'}),
+            'transaction_id': forms.TextInput(attrs={
+                'placeholder': 'Enter reference number',
+                'class': 'w-full rounded-2xl border-gray-100 py-4 px-6'
+            }),
+            'payment_method': forms.Select(attrs={
+                'class': 'w-full rounded-2xl border-gray-100 py-4 px-6'
+            }),
         }

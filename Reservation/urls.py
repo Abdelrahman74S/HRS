@@ -12,6 +12,9 @@ urlpatterns = [
     
     path('<int:pk>/cancel/', views.BookingDeleteView.as_view(), name='booking_delete'),
 
-
-    path('pay/<int:booking_id>/', views.ProcessPaymentView.as_view(), name='process_payment'),
+    path('pay/<int:booking_id>/', views.CreatePaymentView.as_view(), name='process_payment'),
+    
+    path('check-in/<int:booking_id>/', views.check_in_guest, name='check_in'),
+    
+    path('check-out/<int:booking_id>/', views.check_out_guest, name='check_out'),
 ]

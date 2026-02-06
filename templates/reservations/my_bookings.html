@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-10 px-4">
+    <div class="flex justify-between items-center mb-10">
+        <h1 class="text-4xl font-black text-gray-900">Bookings</h1>
+    </div>
+
+    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 border-b border-gray-100">
+                <tr>
+                    <th class="px-8 py-6 text-xs font-black text-gray-400 uppercase tracking-widest">ID</th>
+                    <th class="px-8 py-6 text-xs font-black text-gray-400 uppercase tracking-widest">Room</th>
+                    <th class="px-8 py-6 text-xs font-black text-gray-400 uppercase tracking-widest">Dates</th>
+                    <th class="px-8 py-6 text-xs font-black text-gray-400 uppercase tracking-widest">Total</th>
+                    <th class="px-8 py-6 text-xs font-black text-gray-400 uppercase tracking-widest">Status</th>
+                    <th class="px-8 py-6"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for booking in bookings %}
+                <tr class="hover:bg-gray-50/50 transition-colors">
+                    <td class="px-8 py-6 font-bold text-blue-600">#{{ booking.reservation_number }}</td>
+                    <td class="px-8 py-6">
+                        <p class="font-bold text-gray-900">Room {{ booking.room.room_number }}</p>
+                        <p class="text-xs text-gray-400">{{ booking.room.room_type.name }}</p>
+                    </td>
+                    <td class="px-8 py-6 text-sm text-gray-600">
+                        {{ booking.check_in_date }} → {{ booking.check_out_date }}
+                    </td>
+                    <td class="px-8 py-6 font-black text-gray-900">${{ booking.total_price }}</td>
+                    <td class="px-8 py-6">
+                        <span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest 
+                            {% if booking.status == 'confirmed' %}bg-green-100 text-green-700
+                            {% elif booking.status == 'pending' %}bg-blue-100 text-blue-700
+                            {% elif booking.status == 'cancelled' %}bg-red-100 text-red-700
+                            {% else %}bg-gray-100 text-gray-600{% endif %}">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-8 py-6 text-right space-x-4">
+                        <a href="{% url 'reservations:booking_detail' booking.pk %}" class="text-xs font-black text-gray-400 hover:text-blue-600 transition-colors">DETAILS</a>
+                        {% if booking.status == 'pending' %}
+                        <a href="{% url 'reservations:booking_delete' booking.pk %}" class="text-xs font-black text-red-400 hover:text-red-600 transition-colors">CANCEL</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-8 py-20 text-center">
+                        <p class="text-gray-400 font-bold text-xl">No bookings found.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

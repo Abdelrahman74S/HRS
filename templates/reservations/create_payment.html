@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment for Booking #{{ booking.reservation_number }}{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-12 px-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-gray-50 rounded-[2.5rem] p-8 border border-gray-100 shadow-sm">
+                <h3 class="text-xl font-black text-gray-900 mb-6">Booking Summary</h3>
+                <div class="space-y-4">
+                    <div>
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Reservation No.</span>
+                        <p class="font-bold text-blue-600">#{{ booking.reservation_number }}</p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Room</span>
+                        <p class="font-bold text-gray-900">Room {{ booking.room.room_number }}</p>
+                    </div>
+                    <hr class="border-gray-200 my-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-black text-gray-900 uppercase">Total Price</span>
+                        <span class="text-2xl font-black text-blue-600">${{ booking.total_price }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-[2.5rem] shadow-2xl p-10 border border-gray-50">
+                <h2 class="text-3xl font-black text-gray-900 mb-8">Complete Payment</h2>
+                <form method="POST" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Payment Method</label>
+                            {{ form.payment_method }}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Transaction ID</label>
+                            {{ form.transaction_id }}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Payment Status</label>
+                            {{ form.payment_status }}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Amount</label>
+                            <input type="text" value="${{ booking.total_price }}" disabled class="w-full bg-gray-50 border-none rounded-2xl font-bold py-4 px-6">
+                            <input type="hidden" name="amount" value="{{ booking.total_price }}">
+                        </div>
+                    </div>
+                    <div class="pt-8">
+                        <button type="submit" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl hover:bg-blue-700 shadow-xl transition-all">
+                            Process Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

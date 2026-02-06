@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Details #{{ booking.reservation_number }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-4">
+    <div class="bg-white rounded-[3rem] shadow-xl border border-gray-100 p-8 md:p-12">
+        <div class="flex flex-col md:flex-row justify-between items-start gap-6 mb-12">
+            <div>
+                <h1 class="text-4xl font-black text-gray-900 mb-2">Reservation Info</h1>
+                <p class="text-blue-600 font-bold tracking-widest uppercase text-sm">#{{ booking.reservation_number }}</p>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+                <span class="px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest 
+                    {% if booking.status == 'confirmed' %}bg-green-100 text-green-700
+                    {% elif booking.status == 'checked_in' %}bg-blue-100 text-blue-700
+                    {% elif booking.status == 'checked_out' %}bg-gray-100 text-gray-500
+                    {% elif booking.status == 'pending' %}bg-amber-100 text-amber-700
+                    {% else %}bg-red-100 text-red-700{% endif %}">
+                    {{ booking.get_status_display }}
+                </span>
+                <p class="text-[10px] text-gray-400 font-bold uppercase">Created: {{ booking.created_at|date:"M d, Y" }}</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+            <div class="space-y-8">
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Guest Details</label>
+                    <p class="text-xl font-bold text-gray-900">{{ booking.guest.get_full_name|default:booking.guest.username }}</p>
+                    <p class="text-gray-500">{{ booking.guest.email }}</p>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Room Details</label>
+                    <p class="text-xl font-bold text-gray-900">Room {{ booking.room.room_number }}</p>
+                    <p class="text-gray-500">{{ booking.room.room_type.name }} • Floor {{ booking.room.floor }}</p>
+                </div>
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Stay Duration</label>
+                    <div class="flex items-center gap-4">
+                        <div class="text-center">
+                            <p class="text-xs text-gray-400 uppercase font-black">In</p>
+                            <p class="font-bold text-gray-900">{{ booking.check_in_date|date:"d M Y" }}</p>
+                        </div>
+                        <div class="h-px bg-gray-200 flex-1"></div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-400 uppercase font-black">Out</p>
+                            <p class="font-bold text-gray-900">{{ booking.check_out_date|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Total Amount</label>
+                    <p class="text-4xl font-black text-blue-600">${{ booking.total_price }}</p>
+                </div>
+            </div>
+        </div>
+
+        {% if booking.special_requests %}
+        <div class="bg-gray-50 p-8 rounded-[2rem] mb-12 border border-gray-100 italic text-gray-600">
+            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4 not-italic">Special Requests</label>
+            "{{ booking.special_requests }}"
+        </div>
+        {% endif %}
+
+        <div class="flex flex-wrap gap-4 pt-8 border-t border-gray-50">
+            <a href="{% url 'reservations:my_bookings' %}" class="px-8 py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl hover:bg-gray-200 transition-all">
+                Back to List
+            </a>
+
+            {% if user.is_staff or user.user_type == 'M' %}
+                <div class="flex gap-4 ml-auto">
+                    {% if booking.status == 'confirmed' %}
+                        <a href="{% url 'reservations:check_in' booking.id %}" class="px-10 py-4 bg-green-600 text-white font-black rounded-2xl hover:bg-green-700 shadow-xl shadow-green-100 transition-all">
+                            Confirm Check-in
+                        </a>
+                    {% elif booking.status == 'checked_in' %}
+                        <a href="{% url 'reservations:check_out' booking.id %}" class="px-10 py-4 bg-amber-600 text-white font-black rounded-2xl hover:bg-amber-700 shadow-xl shadow-amber-100 transition-all">
+                            Confirm Check-out
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if user.user_type == 'G' and booking.status == 'pending' %}
+                <div class="flex gap-4 ml-auto">
+                    <a href="{% url 'reservations:process_payment' booking.id %}" class="px-10 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-100 transition-all">
+                        Pay Now
+                    </a>
+                    <a href="{% url 'reservations:booking_delete' booking.pk %}" class="px-8 py-4 text-red-500 font-bold hover:bg-red-50 rounded-2xl transition-all">
+                        Cancel
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
