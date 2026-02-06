@@ -1,74 +1,38 @@
 {% extends 'base.html' %}
-
-{% block title %}Search Rooms - StayEase{% endblock %}
-
 {% block content %}
-<div class="max-w-7xl mx-auto py-10 px-4">
-    <div class="text-center mb-16">
-        <h1 class="text-5xl font-black text-gray-900 tracking-tight mb-4">Find Your Perfect Stay</h1>
-        <p class="text-xl text-gray-500 font-medium">Search by room number, type, or specific features.</p>
-        
-        <form action="{% url 'rooms:room_search' %}" method="GET" class="mt-10 max-w-3xl mx-auto flex gap-2 p-2 bg-white rounded-[2.5rem] shadow-2xl border border-gray-100">
-            <div class="flex-1 flex items-center px-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input type="text" name="q" value="{{ query }}" placeholder="Search room number, e.g. '101' or type 'Suite'..." 
-                       class="w-full border-none focus:ring-0 px-4 text-lg font-medium text-gray-700 placeholder-gray-400">
-            </div>
-            <button type="submit" class="bg-blue-600 text-white px-10 py-4 rounded-[2rem] font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
-                Search
+<div class="max-w-6xl mx-auto py-12 px-4">
+    <h1 class="text-4xl font-black text-gray-900 mb-10">Find Your Room</h1>
+    
+    <form method="GET" action="{% url 'rooms:room_search' %}" class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-50 grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div>
+            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Search</label>
+            <input type="text" name="q" value="{{ q }}" placeholder="Room number or type..." class="w-full rounded-2xl border-gray-100 py-3 px-4 text-sm">
+        </div>
+        <div>
+            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Check-in</label>
+            <input type="date" name="check_in" value="{{ check_in|date:'Y-m-d' }}" class="w-full rounded-2xl border-gray-100 py-3 px-4 text-sm">
+        </div>
+        <div>
+            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Check-out</label>
+            <input type="date" name="check_out" value="{{ check_out|date:'Y-m-d' }}" class="w-full rounded-2xl border-gray-100 py-3 px-4 text-sm">
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="w-full bg-blue-600 text-white font-black py-3 rounded-2xl hover:bg-blue-700 transition-all">
+                Search Availability
             </button>
-        </form>
+        </div>
+    </form>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {% for room in rooms %}
+            <div class="bg-white rounded-[2rem] shadow-md border border-gray-50 overflow-hidden p-6">
+                <h3 class="font-black text-xl mb-2">Room {{ room.room_number }}</h3>
+                <p class="text-gray-500 text-sm mb-4">{{ room.room_type.name }}</p>
+                <a href="{% url 'rooms:room_detail' room.slug %}" class="text-blue-600 font-bold text-sm uppercase tracking-widest">View Details</a>
+            </div>
+        {% empty %}
+            <p class="col-span-3 text-center text-gray-400 font-bold py-20">No rooms available for these dates or criteria.</p>
+        {% endfor %}
     </div>
-
-    {% if query %}
-        <div class="mb-8 flex items-baseline gap-2">
-            <h2 class="text-2xl font-bold text-gray-900">Search Results</h2>
-            <p class="text-gray-500">Found {{ rooms.count }} rooms for "{{ query }}"</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {% for room in rooms %}
-            <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all group">
-                <div class="h-64 relative overflow-hidden">
-                    {% with room.images.all as images %}
-                    <img src="{% if images %}{{ images.0.image.url }}{% else %}https://via.placeholder.com/400x300{% endif %}" 
-                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                    {% endwith %}
-                    <div class="absolute top-4 right-4">
-                        <span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest {% if room.status == 'A' %}bg-green-500/90 text-white{% else %}bg-amber-500/90 text-white{% endif %}">
-                            {{ room.get_status_display }}
-                        </span>
-                    </div>
-                </div>
-                <div class="p-8">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-2xl font-black text-gray-900">Room {{ room.room_number }}</h3>
-                        <p class="text-blue-600 font-black text-xl">${{ room.room_type.base_price|add:room.pricing_override|default:room.room_type.base_price }}</p>
-                    </div>
-                    <p class="text-gray-500 text-sm mb-6">{{ room.room_type.name }} • Floor {{ room.floor }}</p>
-                    <a href="{% url 'rooms:room_detail' room.slug %}" class="block w-full text-center bg-gray-50 text-gray-900 font-bold py-4 rounded-2xl hover:bg-gray-900 hover:text-white transition-all">
-                        View Details
-                    </a>
-                </div>
-            </div>
-            {% empty %}
-            <div class="col-span-full py-20 text-center bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
-                <p class="text-gray-400 font-bold text-xl">No rooms matched your search criteria.</p>
-                <a href="{% url 'rooms:room_list' %}" class="text-blue-600 mt-4 inline-block font-bold hover:underline">View All Inventory</a>
-            </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="py-20 text-center">
-            <div class="inline-flex items-center justify-center w-24 h-24 bg-blue-50 text-blue-600 rounded-full mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16l2.879-2.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <p class="text-gray-400 font-bold text-xl">Try searching for "Suite" or a specific room number.</p>
-        </div>
-    {% endif %}
 </div>
 {% endblock %}
