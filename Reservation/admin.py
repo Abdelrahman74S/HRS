@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Booking, Payment , ManagerBooking , GuestBooking
+from .models import Booking, Payment , ManagerBooking 
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
@@ -13,9 +13,6 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ['transaction_id', 'reservation', 'amount', 'payment_status', 'payment_method']
     list_filter = ['payment_status', 'payment_method']
 
-
-from django.contrib import admin
-from .models import Booking, Payment, ManagerBooking, GuestBooking
 
 
 class BaseBookingAdmin(admin.ModelAdmin):

@@ -3,12 +3,11 @@ from django.views.generic import CreateView, ListView, DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
-
-from .models import Booking
-from .forms import BookingForm
+from .models import Booking , Payment
+from .forms import BookingForm , PaymentForm
 from rooms.models import Room
-
 from Reservation.Ispermissions import IsGuest
+from rooms.Ispermissions import IsManager
 
 class BookingCreateView(IsGuest, CreateView):
     model = Booking
@@ -52,7 +51,7 @@ class UserBookingListView(LoginRequiredMixin, ListView):
         if user.is_staff or user.user_type == 'M':
             return Booking.objects.all()
         return Booking.objects.filter(guest=user)
-
+    
 
 class BookingDetailView(LoginRequiredMixin, DetailView):
     model = Booking
@@ -96,3 +95,73 @@ class BookingDeleteView(LoginRequiredMixin, DeleteView):
             "The booking has been cancelled successfully."
         )
         return super().delete(request, *args, **kwargs)
+
+
+class CreatePaymentView(IsGuest,CreateView):
+    model = Payment
+    form_class = PaymentForm
+    template_name = 'reservations/create_payment.html'
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        context['booking'] = get_object_or_404(Booking, pk=self.kwargs['booking_id'])
+        
+        return context
+    
+    def form_valid(self, form):
+        booking = get_object_or_404(Booking, pk=self.kwargs['booking_id'])
+        
+        form.instance.reservation = booking
+        form.instance.amount = booking.total_price
+        
+        if form.cleaned_data['payment_status'] == 'completed':
+            booking.status = 'confirmed'
+            booking.save()
+            messages.success(self.request, "Payment and booking have been successfully confirmed!" )
+        
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('reservations:my_bookings')
+
+def check_in_guest(request, booking_id):
+    if not (request.user.is_staff or request.user.user_type == 'M'):
+        messages.error(request, "You are not allowed to perform this action.")
+        return redirect('reservations:my_bookings')
+            
+    booking = get_object_or_404(Booking, pk=booking_id)
+    
+    booking.status = 'checked_in'
+    booking.checked_in_by = request.user
+    booking.save()
+    
+    booking.room.status = 'O'  # Occupied
+    booking.room.save()
+    
+    messages.success(
+        request,
+        f"Guest has been successfully checked in to room {booking.room.room_number}."
+    )
+    return redirect('reservations:booking_detail', pk=booking.pk)
+
+
+def check_out_guest(request, booking_id):
+    if not (request.user.is_staff or request.user.user_type == 'M'):
+        messages.error(request, "You are not allowed to perform this action.")
+        return redirect('reservations:my_bookings')
+            
+    booking = get_object_or_404(Booking, pk=booking_id)
+    
+    booking.status = 'checked_out'
+    booking.checked_out_by = request.user
+    booking.save()
+    
+    booking.room.status = 'C'  
+    booking.room.save()
+    
+    messages.success(
+        request,
+        f"Guest has been successfully checked out from room {booking.room.room_number}."
+    )
+    return redirect('reservations:booking_detail', pk=booking.pk)
